@@ -3,32 +3,50 @@
 include_once "conectar.php";
 
 function inserir_sabor($sabor) {
-    global $pdo;
-    $sql = "INSERT INTO sabor_pizza (nome, ingredientes, preco_sem_borda, preco_borda_recheada, doce) " .
-            "VALUES (:nome, :ingredientes, :preco_sem_borda, :preco_com_borda, :doce)";
-    $pdo->prepare($sql)->execute($sabor);
+    $pdo = conectar();
+    $sql = "INSERT INTO sabor_pizza (nome, ingredientes, dt_inclusao, dt_alteracao, preco_sem_borda, preco_borda_recheada, doce) " .
+            "VALUES (:nome, :ingredientes, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, :preco_sem_borda, :preco_com_borda, :doce)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':nome', $sabor['nome']);
+    $stmt->bindValue(':ingredientes', $sabor['ingredientes']);
+    $stmt->bindValue(':preco_sem_borda', $sabor['preco_sem_borda']);
+    $stmt->bindValue(':preco_com_borda', $sabor['preco_com_borda']);
+    $stmt->bindValue(':doce', $sabor['doce']);
+    $stmt->execute();
     return $pdo->lastInsertId();
 }
 
 function listar_todos_sabores() {
-    global $pdo;
+    $pdo = conectar();
     $sql = "SELECT * FROM sabor_pizza";
     $resultados = [];
-    $consulta = $pdo->query($sql);
-    while ($linha = $consulta->fetch()) {
+    $stmt = $pdo->query($sql);
+    while ($linha = $stmt->fetch()) {
         $resultados[] = $linha;
-        for ($i = 0; isset($linha["$i"]); $i++) {
-            unset($linha["$i"]);
-        }
     }
     return $resultados;
 }
 
 function buscar_sabor($chave) {
-    global $pdo;
+    $pdo = conectar();
     $sql = "SELECT * FROM sabor_pizza WHERE chave = :chave";
-    $resultados = [];
-    $consulta = $pdo->prepare($sql);
-    $consulta->execute(["chave" => $chave]);
-    return $consulta->fetch();
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(["chave" => $chave]);
+    return $stmt->fetch();
+}
+
+function login($login, $senha) {
+    $pdo = conectar();
+    $sql = "SELECT * FROM usuario WHERE login = :login AND senha = :senha";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(["login" => $login, "senha" => $senha]);
+    return $stmt->fetch();
+}
+
+function usuario_logado($login) {
+    $pdo = conectar();
+    $sql = "SELECT * FROM usuario WHERE login = :login";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(["login" => $login]);
+    return $stmt->fetch();
 }

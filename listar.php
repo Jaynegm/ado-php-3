@@ -2,8 +2,16 @@
 try {
     include "abrir_transação.php";
 include_once "operações.php";
-$resultado = listar_todos_sabores(); ?>
 
+session_start();
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
+
+$resultado = listar_todos_sabores();
+
+?>
 <!DOCTYPE html>
 <html lang="port-br">
 <head>
@@ -14,6 +22,7 @@ $resultado = listar_todos_sabores(); ?>
     <title>Nossos Sabores</title>
     <link rel="stylesheet" href="style.css">
 </head>
+    <p>Seja bem-vindo(a) <?= usuario_logado($_SESSION["username"])["nome"] ?>.</p>
     <body>
         <table>
             <tr>
@@ -43,6 +52,7 @@ $resultado = listar_todos_sabores(); ?>
             <?php } ?>
         </table>
         <button type="button"><a href="cadastrar.php">Criar novo</a></button>
+        <button type="button"><a href="processar-logout.php">Sair</a></button>
     </body>
 </html>
 <?php
